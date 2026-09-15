@@ -9,6 +9,15 @@ intents.guilds = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+class CloseTicketView(View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, custom_id="close_ticket")
+    async def close_ticket(self, interaction: discord.Interaction, button: Button):
+        await interaction.response.send_message("Closing this ticket in 3 seconds...", ephemeral=True)
+        await interaction.channel.delete()
+
 class TicketButton(View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -18,9 +27,11 @@ class TicketButton(View):
         guild = interaction.guild
         category_name = "paid cleaning"
         
+        # Use existing category only
         category = discord.utils.get(guild.categories, name=category_name)
         if not category:
-            category = await guild.create_category(category_name)
+            await interaction.response.send_message(f"Error: The category '{category_name}' does not exist on this server.", ephemeral=True)
+            return
 
         ticket_channel_name = f"ticket-{interaction.user.name}".lower()
         existing_channel = discord.utils.get(category.text_channels, name=ticket_channel_name)
@@ -36,7 +47,12 @@ class TicketButton(View):
         }
 
         ticket_channel = await guild.create_text_channel(ticket_channel_name, category=category, overwrites=overwrites)
-        await ticket_channel.send(f"Hello {interaction.user.mention}! Welcome to your support ticket. Staff will be with you shortly.")
+        
+        # Find user hidden_2pulse to ping
+        ping_target = discord.utils.get(guild.members, name="hidden_2pulse")
+        ping_text = ping_target.mention if ping_target else "@hidden_2pulse"
+
+        await ticket_channel.send(f"Hello {interaction.user.mention}! Welcome to your support ticket. {ping_text} will be with you shortly.", view=CloseTicketView())
         await interaction.response.send_message(f"Your ticket has been created: {ticket_channel.mention}", ephemeral=True)
 
 @bot.event
