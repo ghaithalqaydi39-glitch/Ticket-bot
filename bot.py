@@ -4,7 +4,6 @@ from discord.ext import commands
 from discord.ui import Button, View
 
 intents = discord.Intents.default()
-intents.message_content = True
 intents.guilds = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -31,7 +30,7 @@ class TicketButton(View):
             await interaction.response.send_message(f"You already have an open ticket: {existing_channel.mention}", ephemeral=True)
             return
 
-        # Set up channel permissions (visible only to the user and server bot/staff)
+        # Set up channel permissions
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(view_channel=False),
             interaction.user: discord.PermissionOverwrite(view_channel=True, send_messages=True),
