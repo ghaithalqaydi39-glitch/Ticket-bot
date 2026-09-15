@@ -48,11 +48,10 @@ class TicketButton(View):
 
         ticket_channel = await guild.create_text_channel(ticket_channel_name, category=category, overwrites=overwrites)
         
-        # Find user hidden_2pulse to ping
-        ping_target = discord.utils.get(guild.members, name="hidden_2pulse")
-        ping_text = ping_target.mention if ping_target else "@hidden_2pulse"
+        # Staff IDs to ping
+        staff_pings = "<@1517950895566880809> <@1399482147961704448>"
 
-        await ticket_channel.send(f"Hello {interaction.user.mention}! Welcome to your support ticket. {ping_text} will be with you shortly.", view=CloseTicketView())
+        await ticket_channel.send(f"Hello {interaction.user.mention}! Welcome to your support ticket. {staff_pings} will be with you shortly.", view=CloseTicketView())
         await interaction.response.send_message(f"Your ticket has been created: {ticket_channel.mention}", ephemeral=True)
 
 @bot.event
