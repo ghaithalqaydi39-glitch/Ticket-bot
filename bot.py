@@ -27,14 +27,16 @@ class TicketButton(View):
         guild = interaction.guild
         category_name = "paid cleaning"
         
-        # Use existing category only
+        # Look for the category, but do NOT create it if it's missing
         category = discord.utils.get(guild.categories, name=category_name)
-        if not category:
-            await interaction.response.send_message(f"Error: The category '{category_name}' does not exist on this server.", ephemeral=True)
-            return
 
         ticket_channel_name = f"ticket-{interaction.user.name}".lower()
-        existing_channel = discord.utils.get(category.text_channels, name=ticket_channel_name)
+        
+        # Check if the user already has an open ticket channel
+        if category:
+            existing_channel = discord.utils.get(category.text_channels, name=ticket_channel_name)
+        else:
+            existing_channel = discord.utils.get(guild.text_channels, name=ticket_channel_name)
         
         if existing_channel:
             await interaction.response.send_message(f"You already have an open ticket: {existing_channel.mention}", ephemeral=True)
@@ -46,6 +48,7 @@ class TicketButton(View):
             guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True)
         }
 
+        # Create the ticket channel (inside the category if it exists, otherwise outside without a category)
         ticket_channel = await guild.create_text_channel(ticket_channel_name, category=category, overwrites=overwrites)
         
         # Staff IDs to ping
