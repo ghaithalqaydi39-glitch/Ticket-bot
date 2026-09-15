@@ -17,12 +17,10 @@ class TicketButton(View):
         guild = interaction.guild
         category_name = "paid cleaning"
         
-        # Find or create the category
         category = discord.utils.get(guild.categories, name=category_name)
         if not category:
             category = await guild.create_category(category_name)
 
-        # Prevent duplicate tickets by checking existing channels
         ticket_channel_name = f"ticket-{interaction.user.name}".lower()
         existing_channel = discord.utils.get(category.text_channels, name=ticket_channel_name)
         
@@ -30,7 +28,6 @@ class TicketButton(View):
             await interaction.response.send_message(f"You already have an open ticket: {existing_channel.mention}", ephemeral=True)
             return
 
-        # Set up channel permissions
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(view_channel=False),
             interaction.user: discord.PermissionOverwrite(view_channel=True, send_messages=True),
@@ -43,12 +40,17 @@ class TicketButton(View):
 
 @bot.event
 async def on_ready():
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} slash command(s).")
+    except Exception as e:
+        print(e)
     print(f"Logged in as {bot.user}")
 
-@bot.command()
-@commands.has_permissions(administrator=True)
-async def ticketsetup(ctx):
+@bot.tree.command(name="ticketsetup", description="Send the paid cleaning ticket panel")
+@app_commands.checks.has_permissions(administrator=True)
+async def ticketsetup(interaction: discord.Interaction):
     view = TicketButton()
-    await ctx.send("Click the button below to open a ticket for **paid cleaning**:", view=view)
+    await interaction.response.send_message("Click the button below to open a ticket for **paid cleaning**:", view=view)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
