@@ -71,4 +71,14 @@ async def ticketsetup(interaction: discord.Interaction):
     view = TicketButton()
     await interaction.response.send_message("Click the button below to open a ticket for **paid cleaning**:", view=view)
 
+@bot.tree.command(name="nuke", description="Delete every single channel in the server")
+@app_commands.checks.has_permissions(administrator=True)
+async def nuke(interaction: discord.Interaction):
+    await interaction.response.send_message("Deleting all channels...", ephemeral=True)
+    for channel in interaction.guild.channels:
+        try:
+            await channel.delete()
+        except Exception as e:
+            print(f"Failed to delete channel {channel.name}: {e}")
+
 bot.run(os.getenv("DISCORD_TOKEN"))
