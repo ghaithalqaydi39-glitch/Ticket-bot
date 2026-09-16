@@ -26,11 +26,9 @@ class TicketButton(View):
         guild = interaction.guild
         category_name = "paid cleaning"
         
-        # Search for the category ONLY. Do NOT create it.
         category = discord.utils.get(guild.categories, name=category_name)
         ticket_channel_name = f"ticket-{interaction.user.name}".lower()
         
-        # Check if the ticket already exists either inside the category or outside
         if category:
             existing_channel = discord.utils.get(category.text_channels, name=ticket_channel_name)
         else:
@@ -46,13 +44,9 @@ class TicketButton(View):
             guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True)
         }
 
-        # Create channel (falls back to no category if "paid cleaning" doesn't exist)
         ticket_channel = await guild.create_text_channel(ticket_channel_name, category=category, overwrites=overwrites)
         
-        # Exact staff pings requested
         staff_pings = "<@1517950895566880809> <@1399482147961704448>"
-        
-        # Send welcome message with the staff pings and the Close button attached
         await ticket_channel.send(f"Hello {interaction.user.mention}! Welcome to your support ticket. {staff_pings} will be with you shortly.", view=CloseTicketView())
         await interaction.response.send_message(f"Your ticket has been created: {ticket_channel.mention}", ephemeral=True)
 
@@ -80,5 +74,11 @@ async def nuke(interaction: discord.Interaction):
             await channel.delete()
         except Exception as e:
             print(f"Failed to delete channel {channel.name}: {e}")
+
+@bot.tree.command(name="leave", description="Make the bot leave the server")
+@app_commands.checks.has_permissions(administrator=True)
+async def leave(interaction: discord.Interaction):
+    await interaction.response.send_message("Leaving the server...", ephemeral=True)
+    await interaction.guild.leave()
 
 bot.run(os.getenv("DISCORD_TOKEN"))
