@@ -13,7 +13,7 @@ class CloseTicketView(View):
 
     @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, custom_id="close_ticket")
     async def close_ticket(self, interaction: discord.Interaction, button: Button):
-        await interaction.response.send_message("Closing this ticket...", ephemeral=True)
+        await interaction.response.defer(ephemeral=True)
         await interaction.channel.delete()
 
 class TicketButton(View):
@@ -22,7 +22,6 @@ class TicketButton(View):
 
     @discord.ui.button(label="Create Ticket", style=discord.ButtonStyle.green, custom_id="create_ticket")
     async def create_ticket(self, interaction: discord.Interaction, button: Button):
-        # Defer immediately to prevent "Application did not respond" timeout errors
         await interaction.response.defer(ephemeral=True)
         
         guild = interaction.guild
@@ -56,7 +55,6 @@ class TicketButton(View):
 async def on_ready():
     print(f"Logged in as {bot.user}")
     try:
-        # This syncs commands globally
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} slash command(s).")
     except Exception as e:
@@ -65,13 +63,14 @@ async def on_ready():
 @bot.tree.command(name="ticketsetup", description="Send the paid cleaning ticket panel")
 @app_commands.checks.has_permissions(administrator=True)
 async def ticketsetup(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
     view = TicketButton()
-    await interaction.response.send_message("Click the button below to open a ticket for **paid cleaning**:", view=view)
+    await interaction.followup.send("Click the button below to open a ticket for **paid cleaning**:", view=view)
 
 @bot.tree.command(name="nuke", description="Delete every single channel in the server")
 @app_commands.checks.has_permissions(administrator=True)
 async def nuke(interaction: discord.Interaction):
-    await interaction.response.send_message("Deleting all channels...", ephemeral=True)
+    await interaction.response.defer(ephemeral=True)
     for channel in interaction.guild.channels:
         try:
             await channel.delete()
@@ -81,7 +80,7 @@ async def nuke(interaction: discord.Interaction):
 @bot.tree.command(name="leave", description="Make the bot leave the server")
 @app_commands.checks.has_permissions(administrator=True)
 async def leave(interaction: discord.Interaction):
-    await interaction.response.send_message("Leaving the server...", ephemeral=True)
+    await interaction.response.defer(ephemeral=True)
     await interaction.guild.leave()
 
 bot.run(os.getenv("DISCORD_TOKEN"))
