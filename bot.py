@@ -61,7 +61,7 @@ async def on_ready():
         print(e)
 
 @bot.tree.command(name="ticketsetup", description="Send the paid cleaning ticket panel")
-@app_commands.checks.has_permissions(administrator=True)
+@app_checks.has_permissions(administrator=True) if 'app_checks' in globals() else app_commands.checks.has_permissions(administrator=True)
 async def ticketsetup(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
     view = TicketButton()
@@ -71,7 +71,7 @@ async def ticketsetup(interaction: discord.Interaction):
 @app_commands.checks.has_permissions(administrator=True)
 async def nuke(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
-    for channel in interaction.guild.channels:
+    for channel in list(interaction.guild.channels):
         try:
             await channel.delete()
         except Exception as e:
