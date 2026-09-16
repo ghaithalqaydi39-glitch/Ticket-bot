@@ -4,7 +4,6 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ui import Button, View
 
-# Basic intents to avoid any privileged gateway errors
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -23,6 +22,9 @@ class TicketButton(View):
 
     @discord.ui.button(label="Create Ticket", style=discord.ButtonStyle.green, custom_id="create_ticket")
     async def create_ticket(self, interaction: discord.Interaction, button: Button):
+        # Defer immediately to prevent "Application did not respond" timeout errors
+        await interaction.response.defer(ephemeral=True)
+        
         guild = interaction.guild
         category_name = "paid cleaning"
         
@@ -35,7 +37,7 @@ class TicketButton(View):
             existing_channel = discord.utils.get(guild.text_channels, name=ticket_channel_name)
         
         if existing_channel:
-            await interaction.response.send_message(f"You already have an open ticket: {existing_channel.mention}", ephemeral=True)
+            await interaction.followup.send(f"You already have an open ticket: {existing_channel.mention}", ephemeral=True)
             return
 
         overwrites = {
@@ -48,16 +50,17 @@ class TicketButton(View):
         
         staff_pings = "<@1517950895566880809> <@1399482147961704448>"
         await ticket_channel.send(f"Hello {interaction.user.mention}! Welcome to your support ticket. {staff_pings} will be with you shortly.", view=CloseTicketView())
-        await interaction.response.send_message(f"Your ticket has been created: {ticket_channel.mention}", ephemeral=True)
+        await interaction.followup.send(f"Your ticket has been created: {ticket_channel.mention}", ephemeral=True)
 
 @bot.event
 async def on_ready():
+    print(f"Logged in as {bot.user}")
     try:
+        # This syncs commands globally
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} slash command(s).")
     except Exception as e:
         print(e)
-    print(f"Logged in as {bot.user}")
 
 @bot.tree.command(name="ticketsetup", description="Send the paid cleaning ticket panel")
 @app_commands.checks.has_permissions(administrator=True)
