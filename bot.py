@@ -54,11 +54,13 @@ class TicketButton(View):
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
-    try:
-        synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} slash command(s).")
-    except Exception as e:
-        print(e)
+    # Force instant sync to every server the bot is in
+    for guild in bot.guilds:
+        try:
+            synced = await bot.tree.sync(guild=guild)
+            print(f"Synced {len(synced)} command(s) to guild: {guild.name}")
+        except Exception as e:
+            print(f"Failed to sync to {guild.name}: {e}")
 
 @bot.tree.command(name="ticketsetup", description="Send the paid cleaning ticket panel")
 async def ticketsetup(interaction: discord.Interaction):
